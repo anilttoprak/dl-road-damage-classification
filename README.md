@@ -27,6 +27,10 @@ Bu çalışma bir `image classification` projesidir. Yani model nesnenin yerini 
 
 ## Dataset Özeti
 
+Veri seti buradan alınıp düzenlendi:
+
+https://www.kaggle.com/datasets/lorenzoarcioni/road-damage-dataset-potholes-cracks-and-manholes
+
 Toplam classification crop sayısı:
 
 - `4736`
