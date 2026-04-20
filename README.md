@@ -55,12 +55,6 @@ Test split:
 
 Projede train/test sızıntısı kontrol edildi ve aynı kaynak görüntüden gelen crop’ların hem train hem test içinde yer almaması sağlandı.
 
-Güncel durumda kaynak görüntü overlap:
-
-- `Crack`: `0`
-- `Pothole`: `0`
-- `Manhole`: `0`
-
 Bu, test sonuçlarının daha güvenilir olmasını sağlar.
 
 ## Kullanılan Modeller
