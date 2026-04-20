@@ -1,12 +1,8 @@
 # Road Damage Classification
 
-Bu proje, yol hasarı görüntülerini üç sınıfa ayırmak için geliştirilmiş bir görüntü sınıflandırma çalışmasıdır:
+Bu proje, yol hasarı görüntülerini `Crack`, `Pothole` ve `Manhole` olarak sınıflandırmak için geliştirilmiş bir bilgisayarlı görü projesidir.
 
-- `Crack`
-- `Pothole`
-- `Manhole`
-
-Projede transfer learning yaklaşımıyla iki farklı model eğitildi:
+Projede transfer learning ile iki model denenmiştir:
 
 - `EfficientNet-B0`
 - `ResNet50`
@@ -15,28 +11,25 @@ Ana çalışma dosyası:
 
 - `road_damage_classifier.ipynb`
 
-Kaydedilmiş model dosyası:
+Kaydedilmiş model:
 
 - `resnet50_road_damage.pt`
 
-## Projenin Amacı
+## Proje Amacı
 
-Amaç, kırpılmış yol hasarı görüntülerinin hangi hasar türüne ait olduğunu tahmin etmektir. Bu proje bir `classification` projesidir; yani model doğrudan nesnenin yerini bulmaz, verilen görüntünün hangi sınıfa ait olduğunu tahmin eder.
+Amaç, kırpılmış yol hasarı görüntülerini üç sınıftan birine atamaktır:
 
-Bu yüzden proje:
+- `Crack`
+- `Pothole`
+- `Manhole`
 
-- `object detection` değildir
-- `segmentation` değildir
-- en iyi sonucu, hasarın görüntü içinde net ve belirgin olduğu crop görüntülerde verir
+Bu çalışma bir `image classification` projesidir. Yani model nesnenin yerini bulmaz; verilen görüntünün hangi sınıfa ait olduğunu tahmin eder.
 
 ## Dataset Özeti
 
-Sınıflandırma verisi, etiketli yol hasarı veri setinden crop üretilerek hazırlandı.
+Toplam classification crop sayısı:
 
-Toplam veri:
-
-- kaynak görüntü sayısı: `2009`
-- toplam crop sayısı: `4736`
+- `4736`
 
 Sınıf dağılımı:
 
@@ -44,16 +37,14 @@ Sınıf dağılımı:
 - `Pothole`: `1261`
 - `Manhole`: `957`
 
-### Güncel Train/Test Dağılımı
-
-Train:
+Train split:
 
 - `Crack`: `2014`
 - `Pothole`: `1009`
 - `Manhole`: `766`
 - toplam: `3789`
 
-Test:
+Test split:
 
 - `Crack`: `504`
 - `Pothole`: `252`
@@ -62,68 +53,29 @@ Test:
 
 ## Veri Tarafında Yaptığımız İyileştirmeler
 
-Bu projede yalnızca model eğitimi değil, veri kalitesi tarafı da iyileştirildi.
+Projede train/test sızıntısı kontrol edildi ve aynı kaynak görüntüden gelen crop’ların hem train hem test içinde yer almaması sağlandı.
 
-### 1. Train/Test Leakage Sorunu Temizlendi
+Güncel durumda kaynak görüntü overlap:
 
-İlk ayrımda aynı ana görüntüden üretilen farklı crop'lar hem `train` hem `test` içine dağılabiliyordu. Bu durum test performansını olduğundan daha iyi gösterebilirdi.
+- `Crack`: `0`
+- `Pothole`: `0`
+- `Manhole`: `0`
 
-Veri yeniden düzenlenerek split görüntü bazlı temizlendi.
-
-Yani aynı kaynak görüntü ailesi artık hem train hem test içinde yer almıyor.
-
-### 2. Sınıf Yerleşimleri Kontrol Edildi
-
-Crop'ların yanlış klasöre düşüp düşmediği kontrol edildi.
-
-Sonuç:
-
-- `Crack`, `Pothole` ve `Manhole` sınıf atamaları genel olarak doğru
-- belirgin sınıf-karışımı tespit edilmedi
-- veri yapısı eğitim için kullanılabilir durumda
+Bu, test sonuçlarının daha güvenilir olmasını sağlar.
 
 ## Kullanılan Modeller
 
 ### EfficientNet-B0
 
-- ImageNet pretrained ağırlıklarla başlatıldı
-- feature extractor'ın büyük bölümü donduruldu
-- son bloklar fine-tuning için açıldı
-- classifier katmanı yeniden tanımlandı
+- pretrained ImageNet ağırlıkları kullanıldı
+- son katmanlar fine-tuning için açıldı
 
 ### ResNet50
 
-- ImageNet pretrained ağırlıklarla başlatıldı
-- backbone büyük ölçüde donduruldu
+- pretrained ImageNet ağırlıkları kullanıldı
 - `layer4` fine-tuning için açıldı
-- son fully connected katman yeniden tanımlandı
-
-## Veri Ön İşleme ve Augmentation
-
-Notebook içinde kullanılan temel dönüşümler:
-
-Train dönüşümleri:
-
-- `Resize((256, 256))`
-- `RandomCrop(224)`
-- `RandomHorizontalFlip(p=0.5)`
-- `RandomRotation(degrees=15)`
-- `ColorJitter(brightness=0.2, contrast=0.2)`
-- `ToTensor()`
-- `Normalize(ImageNet mean/std)`
-
-Test dönüşümleri:
-
-- `Resize((256, 256))`
-- `CenterCrop(224)`
-- `ToTensor()`
-- `Normalize(ImageNet mean/std)`
-
-Bu yapı, pretrained modellerle uyumlu giriş üretmek ve eğitim verisinde çeşitlilik sağlamak için kullanıldı.
 
 ## Eğitim Ayarları
-
-Notebook içindeki güncel eğitim ayarları:
 
 - optimizer: `AdamW`
 - learning rate: `1e-4`
@@ -131,97 +83,85 @@ Notebook içindeki güncel eğitim ayarları:
 - batch size: `32`
 - epoch: `10`
 
-## Güncel Sonuçlar
+## Sonuçlar
 
-Notebook içindeki son çalıştırmaya göre en iyi test doğrulukları:
+Notebook içindeki güncel sonuçlar:
 
 | Model | En İyi Test Doğruluğu |
 |---|---:|
 | EfficientNet-B0 | `74.57%` |
 | ResNet50 | `75.16%` |
 
-### Sonuç Yorumu
+En iyi model:
 
-- En iyi sonucu `ResNet50` verdi
-- `EfficientNet-B0` da yakın performans gösterdi
-- mevcut repoda saklanan model: `resnet50_road_damage.pt`
+- `ResNet50`
 
-## Performansı Artırmak İçin Neler Yaptık?
+## Kurulum
 
-Projede performans ve güvenilirliği artırmak için şu adımlar uygulandı:
+Bu projeyi kullanmak için sanal ortam klasörünü repoya yüklemeniz gerekmez. Her kullanıcı kendi makinesinde ayrı bir sanal ortam oluşturmalıdır.
 
-1. Veri sızıntısı temizlendi
-2. Train/test split görüntü bazlı yeniden kuruldu
-3. Crop dosyaları ve sınıf klasörleri kontrol edildi
-4. Transfer learning kullanıldı
-5. Data augmentation uygulandı
-6. İki farklı pretrained mimari karşılaştırıldı
-7. Eğitilen model notebook içinden `.pt` dosyası olarak kaydedilebilir hale getirildi
+### 1. Repoyu klonla
 
-## Notebook İçindeki Eklenen Kullanım Akışı
+```bash
+git clone <repo-url>
+cd road_damage_classification
+```
 
-Notebook sonunda eğitilmiş modeli kaydetmek için ek hücre bulunur.
+### 2. Sanal ortam oluştur
 
-Eklenen fonksiyon:
+Windows PowerShell:
 
-- `save_model_checkpoint(...)`
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
 
-Bu hücre sayesinde eğitimden sonra:
+macOS / Linux:
 
-- `res_model`
-- `class_names`
-- model adı
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
 
-kullanılarak model dosyası kaydedilir:
+### 3. Bağımlılıkları yükle
+
+```bash
+pip install -r requirements.txt
+```
+
+## Kullanım
+
+Notebook dosyasını aç:
+
+- `road_damage_classifier.ipynb`
+
+Notebook içinde tipik akış:
+
+1. veri yükleme
+2. transform tanımlama
+3. dataloader oluşturma
+4. modeli eğitme
+5. test doğruluğunu ölçme
+6. yeni görsellerde tahmin alma
+7. eğitilen modeli kaydetme
+
+## Model Kaydetme
+
+Notebook sonunda eğitilmiş modeli `.pt` olarak kaydetmek için ek hücre bulunur.
+
+Kaydedilen örnek dosya:
 
 - `resnet50_road_damage.pt`
-
+- 
 ## Proje Yapısı
 
 ```text
 road_damage_classification/
 ├── road_damage/
 │   ├── train/
-│   │   ├── Crack/
-│   │   ├── Manhole/
-│   │   └── Pothole/
 │   └── test/
-│       ├── Crack/
-│       ├── Manhole/
-│       └── Pothole/
 ├── road_damage_classifier.ipynb
 ├── resnet50_road_damage.pt
+├── requirements.txt
+├── .gitignore
 ```
-
-## Nasıl Çalıştırılır?
-
-1. Notebook'u aç:
-
-- `road_damage_classifier.ipynb`
-
-2. Sırasıyla şu adımları çalıştır:
-
-- veri yükleme hücreleri
-- model oluşturma hücreleri
-- eğitim hücreleri
-- özet sonuç hücresi
-- inference hücreleri
-- model kaydetme hücresi
-
-3. Eğitim sonunda model dosyası oluşur:
-
-- `resnet50_road_damage.pt`
-
-## Sonuç
-
-Bu proje, yol hasarı sınıflandırması için transfer learning tabanlı, pratik ve geliştirilebilir bir temel sunar.
-
-Öne çıkan kazanımlar:
-
-- veri sızıntısı temizlendi
-- split daha güvenilir hale getirildi
-- iki farklı güçlü pretrained model karşılaştırıldı
-- `ResNet50` ile `75.16%` test doğruluğu elde edildi
-- eğitim sonrası model kaydetme akışı notebook içine eklendi
-
-Bir sonraki mantıklı adım, bu classification yapısını `object detection` tabanlı bir sisteme dönüştürmek olacaktır.
